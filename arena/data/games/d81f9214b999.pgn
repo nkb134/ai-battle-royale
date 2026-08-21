@@ -1,0 +1,13 @@
+[Event "Arena"]
+[Site "local"]
+[Date "2026.08.21"]
+[Round "?"]
+[White "gemini-2.5-pro"]
+[Black "gemini-2.5-flash-lite"]
+[Result "1-0"]
+[TimeControl "10+5"]
+[Termination "adjudicated_resignation"]
+[Adjudicated "true"]
+[ConfigHash "a4cfaa121018868c"]
+
+1. e4 { [%eval 0.36] [%clk 599s] [%budget 344] [%rtok 200] } 1... c5 { [%eval 0.43] [%clk 601s] [%budget 2864] } 2. Nf3 { [%eval 0.35] [%clk 601s] [%budget 351] [%rtok 225] } 2... Nc6 { [%eval 0.31] [%clk 603s] [%budget 2926] [%retries 1] } 3. d4 { [%eval 0.19] [%clk 602s] [%budget 359] [%rtok 226] } 3... cxd4 { [%eval 0.26] [%clk 607s] [%budget 2992] } 4. Nxd4 { [%eval 0.26] [%clk 603s] [%budget 367] [%rtok 305] } 4... g6 { [%eval 0.33] [%clk 609s] [%budget 3070] [%retries 1] } 5. c4 { [%eval 0.52] [%clk 604s] [%budget 375] [%rtok 266] } 5... Nb4 { [%eval 1.07] [%clk 602s] [%budget 3146] [%retries 3] [%forced_random] } 6. a3 { [%eval 0.83] [%clk 603s] [%budget 384] [%rtok 384] } 6... d6 { [%eval 5.21] [%clk 598s] [%budget 3183] } 7. axb4 { [%eval 5.22] [%clk 602s] [%budget 392] [%rtok 333] } 7... Qd7 { [%eval 5.51] [%clk 576s] [%budget 3241] [%retries 3] [%forced_random] } 8. Nc3 { [%eval 5.39] [%clk 601s] [%budget 401] [%rtok 397] } 8... Bh6 { [%eval 5.88] [%clk 569s] [%budget 3214] [%retries 3] [%forced_random] } 9. Bxh6 { [%eval 5.72] [%clk 601s] [%budget 411] [%rtok 373] } 9... Qg4 { [%eval 8.76] [%clk 554s] [%budget 3257] [%retries 3] [%forced_random] } 10. f3 { [%eval 5.65] [%clk 601s] [%budget 421] [%rtok 329] } 10... Qxf3 { [%eval 9.31] [%clk 556s] [%budget 3263] } 11. gxf3 { [%eval 9.41] [%clk 601s] [%budget 432] [%rtok 366] } 11... Nf6 { [%eval 10.21] [%clk 558s] [%budget 3361] [%retries 1] } 12. Bg5 { [%eval 9.82] [%clk 597s] [%budget 445] [%rtok 441] [%retries 1] } 12... Nd7 { [%eval 9.97] [%clk 555s] [%budget 3465] [%retries 1] } 13. c5 { [%eval 9.50] [%clk 595s] [%budget 455] [%rtok 453] } 13... d5 { [%eval 10.69] [%clk 556s] [%budget 3551] } 14. exd5 { [%eval 9.99] [%clk 593s] [%budget 468] [%rtok 466] } 14... Nf6 { [%eval 10.74] [%clk 553s] [%budget 3660] [%retries 1] } 15. Bxf6 { [%eval 10.18] [%clk 585s] [%budget 482] [%rtok 456] [%retries 1] } 15... b6 { [%eval 12.29] [%clk 522s] [%budget 3762] [%retries 3] [%forced_random] } 16. cxb6 { [%eval 10.86] [%clk 583s] [%budget 491] [%rtok 446] } 16... axb6 { [%eval 13.06] [%clk 522s] [%budget 3688] [%retries 1] } 1-0
