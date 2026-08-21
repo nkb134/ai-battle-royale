@@ -1,0 +1,226 @@
+/*
+ * §12 — dark by default. The eval bar and the classification colours are the only
+ * saturated things on the page, so the chess reads first. The board stays a standard
+ * brown. Nothing animates unless it is reacting to a real event.
+ */
+
+:root {
+  --bg: #14140f;
+  --panel: #1d1d18;
+  --panel-2: #26261f;
+  --line: #34342c;
+  --text: #e8e6df;
+  --muted: #8f8d84;
+
+  --best: #7bb661;
+  --good: #9a988f;
+  --inaccuracy: #d6b64a;
+  --mistake: #d98a3d;
+  --blunder: #c9503f;
+  --brilliant: #4bb3c4;
+  --panic: #d98a3d;
+
+  --board: 512px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font: inherit; color: inherit; cursor: pointer; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+.muted { color: var(--muted); }
+.error { color: var(--blunder); }
+.vs { color: var(--muted); font-weight: 400; padding: 0 .35em; }
+
+.link {
+  background: none; border: 0; padding: 0;
+  color: var(--muted); text-decoration: underline; text-underline-offset: 3px;
+}
+.link:hover { color: var(--text); }
+
+/* ---- setup / archive ------------------------------------------------ */
+
+.setup { max-width: 720px; margin: 0 auto; padding: 64px 24px 96px; }
+.setup-header h1 { font-size: 40px; margin: 0 0 4px; letter-spacing: -.02em; }
+.tagline { margin: 0; color: var(--muted); }
+.setup-explainer { margin: 32px 0 40px; }
+.setup-explainer p { margin: 0 0 12px; }
+
+.archive h2, .live h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.archive-list { list-style: none; margin: 0; padding: 0; }
+.archive-list li { border-bottom: 1px solid var(--line); }
+
+.archive-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 16px; align-items: baseline;
+  width: 100%; padding: 12px 8px;
+  background: none; border: 0; text-align: left;
+}
+.archive-row:hover { background: var(--panel); }
+.archive-players { font-weight: 600; }
+.archive-tc, .archive-plies { color: var(--muted); font-variant-numeric: tabular-nums; }
+.archive-result { color: var(--muted); }
+.qualifier { color: var(--inaccuracy); font-style: normal; }
+
+.live { margin-top: 40px; }
+.live-form { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.live-form p { flex-basis: 100%; margin: 0 0 8px; font-size: 13px; }
+.live-form input {
+  flex: 1; min-width: 240px; padding: 8px 10px;
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--line); border-radius: 6px;
+}
+.live-form button, .controls button, .controls select {
+  padding: 8px 14px; background: var(--panel-2); color: var(--text);
+  border: 1px solid var(--line); border-radius: 6px;
+}
+
+/* ---- match ----------------------------------------------------------- */
+
+.match { max-width: 1080px; margin: 0 auto; padding: 20px 24px 64px; }
+.match-header {
+  display: flex; align-items: center; gap: 20px;
+  padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--line);
+}
+.match-title { font-weight: 600; margin-right: auto; }
+.match-title .tc { color: var(--muted); font-weight: 400; margin-left: 12px; }
+.toggle { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+
+.banner {
+  padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px;
+  background: var(--panel); color: var(--muted);
+}
+.banner.live { color: var(--best); }
+.banner.warn { color: var(--inaccuracy); }
+.banner .dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: currentColor; margin-right: 8px; vertical-align: middle;
+}
+
+.match-middle { display: flex; gap: 16px; align-items: flex-start; }
+.board-column { display: flex; flex-direction: column; gap: 10px; }
+.board { width: var(--board); height: var(--board); }
+
+/* ---- player box ------------------------------------------------------ */
+
+.playerbox {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; margin: 8px 0;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+}
+.playerbox.active { border-color: #5c5a4c; background: var(--panel-2); }
+.playerbox-main { flex: 1; min-width: 0; }
+.playerbox-name { font-weight: 600; display: flex; align-items: baseline; gap: 10px; }
+.budget { font-size: 12px; color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+/* Placeholder until Phase 4 puts real sprite sheets here. */
+.face {
+  width: 44px; height: 44px; border-radius: 6px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  display: grid; place-items: center; color: var(--muted); flex: none;
+}
+.face-thinking { border-color: #5c5a4c; }
+.face-placeholder { font-size: 20px; line-height: 1; }
+
+.captured { font-size: 15px; color: var(--muted); min-height: 1.4em; letter-spacing: -2px; }
+.captured .edge { margin-left: 8px; letter-spacing: 0; font-size: 12px; }
+.taunt {
+  max-width: 260px; padding: 6px 10px; font-size: 13px;
+  background: var(--panel-2); border-radius: 10px; color: var(--muted);
+}
+
+.clock {
+  font: 600 26px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-variant-numeric: tabular-nums; padding: 6px 12px; border-radius: 6px;
+  background: var(--panel-2); min-width: 108px; text-align: center;
+}
+.clock.running { color: #fff; }
+.clock.low { color: var(--inaccuracy); }
+.clock.critical { color: var(--blunder); }
+
+/* ---- eval bar -------------------------------------------------------- */
+
+.evalbar {
+  position: relative; width: 26px; flex: none;
+  border-radius: 4px; overflow: hidden; background: #111;
+  display: flex; flex-direction: column;
+}
+.evalbar-black { background: #2c2c28; }
+.evalbar-white { background: #e8e6df; }
+.evalbar-label {
+  position: absolute; left: 0; right: 0; text-align: center;
+  font: 600 10px/1 ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums;
+}
+.evalbar-label.on-white { bottom: 4px; color: #14140f; }
+.evalbar-label.on-black { top: 4px; color: #e8e6df; }
+
+/* ---- callout, controls ----------------------------------------------- */
+
+.callout {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  min-height: 32px; font-size: 14px;
+}
+.chip {
+  font-size: 12px; padding: 2px 8px; border-radius: 999px;
+  background: var(--panel-2); color: var(--muted);
+}
+.chip.best { color: var(--best); }
+.chip.inaccuracy { color: var(--inaccuracy); }
+.chip.mistake { color: var(--mistake); }
+.chip.blunder { color: var(--blunder); }
+.chip.brilliant { color: var(--brilliant); }
+.chip.panic { color: var(--panic); }
+.chip.illegal { color: var(--blunder); }
+
+.controls { display: flex; align-items: center; gap: 8px; }
+.controls input[type="range"] { flex: 1; accent-color: #7a7768; }
+.controls button.primary { min-width: 82px; }
+.controls button:disabled { opacity: .4; cursor: default; }
+
+/* ---- move list ------------------------------------------------------- */
+
+.movelist {
+  flex: 1; min-width: 220px; height: var(--board);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+}
+.movelist-scroll { height: 100%; overflow-y: auto; padding: 8px 4px; }
+.movepair {
+  display: grid; grid-template-columns: 36px 1fr 1fr;
+  gap: 4px; align-items: baseline; padding: 1px 6px;
+}
+.movenum { color: var(--muted); font-size: 12px; text-align: right; }
+.move {
+  padding: 2px 6px; border-radius: 4px; cursor: default;
+  font-variant-numeric: tabular-nums;
+}
+.move.empty { cursor: default; }
+.move.current { background: var(--panel-2); }
+.move.best { color: var(--best); }
+.move.inaccuracy { color: var(--inaccuracy); }
+.move.mistake { color: var(--mistake); }
+.move.blunder { color: var(--blunder); }
+.move.brilliant { color: var(--brilliant); }
+.mark { font-size: 9px; margin-left: 1px; }
+.panic-mark { color: var(--panic); }
+.illegal-mark { color: var(--blunder); }
+
+/* ---- result ---------------------------------------------------------- */
+
+.result {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-top: 12px; padding: 12px 16px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+}
+.result strong { font-size: 20px; }
+.result span { color: var(--muted); }
+/* §15 — a flagged or adjudicated game never gets to look like a clean win. */
+.result.qualified { border-color: var(--inaccuracy); }
+.result.qualified em { color: var(--inaccuracy); font-style: normal; font-size: 13px; }

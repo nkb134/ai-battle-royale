@@ -131,6 +131,11 @@ class Match:
             black=self.adapters[BLACK].name,
             time_control=str(self.settings.time_control),
             starting_fen=self.board.fen(),
+            # Starting clocks, so a client can show them before the first move rather
+            # than parsing the time-control label itself.
+            clock_white=self.clock.remaining_ms(WHITE),
+            clock_black=self.clock.remaining_ms(BLACK),
+            increment_ms=self.clock.increment_ms,
         )
         if self.log:
             self.log.write(

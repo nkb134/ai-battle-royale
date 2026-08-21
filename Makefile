@@ -1,4 +1,4 @@
-.PHONY: setup serve web dev match analyze calibrate test lint fmt
+.PHONY: setup serve web web-build replays dev match analyze calibrate test lint fmt
 
 PY := .venv/bin/python
 
@@ -15,8 +15,18 @@ setup:
 serve:
 	$(PY) -m arena.api.server
 
-web:
-	cd arena/web && pnpm install && pnpm dev
+# Replays live in arena/data and are copied into the web app, never duplicated in the
+# repo (§16.2). The Pages workflow does the same copy at build time.
+replays:
+	$(PY) -m arena.cli index
+	mkdir -p arena/web/public/replays
+	cp arena/data/replays/*.json arena/web/public/replays/
+
+web: replays
+	pnpm --dir arena/web install && pnpm --dir arena/web dev
+
+web-build: replays
+	pnpm --dir arena/web install && pnpm --dir arena/web build
 
 dev:
 	$(MAKE) -j2 serve web

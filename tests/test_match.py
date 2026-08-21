@@ -170,6 +170,16 @@ async def test_the_model_is_told_the_budget_it_is_capped_at():
     assert ctx.token_budget == m.plies[0]["token_budget"]
 
 
+async def test_match_start_carries_the_starting_clocks():
+    """§7 — a client should not have to parse the time-control label to show a clock."""
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"), max_plies=2)
+    await m.run()
+    start = m.stream.events[0]
+    assert start["clock_white"] == 60_000
+    assert start["clock_black"] == 60_000
+    assert start["increment_ms"] == 1_000
+
+
 async def test_events_are_sequential_and_start_and_end_the_match():
     """§7 — append-only with a monotonic seq."""
     m = make_match(

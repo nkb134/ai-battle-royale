@@ -1,0 +1,6 @@
+# Replays are copied in at build time from arena/data/replays (§16.2), and for local
+# dev via `make web`. They are not a second copy in the repo.
+public/replays/
+dist/
+node_modules/
+tsconfig.tsbuildinfo
