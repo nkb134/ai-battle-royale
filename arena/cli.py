@@ -260,8 +260,11 @@ async def analyze(args) -> int:
     if built.opening_name:
         print(f"  opening: {built.opening_eco} {built.opening_name} "
               f"(left book at ply {built.left_book_at_ply})")
-    for name, stats in ((built.white, w), (built.black, b)):
-        print(f"  {name}:")
+    # Keyed on side, not on name: a mirror match has the same name on both sides and
+    # matching by name silently reports White's figures twice.
+    for side, name, stats in (("white", built.white, w), ("black", built.black, b)):
+        label = f"{name} (as {side})" if built.white == built.black else name
+        print(f"  {label}:")
         print(f"    ACPL {stats.acpl}  blunders {stats.blunders}  "
               f"illegal {stats.illegal_moves}")
         if stats.panic_plies:
@@ -274,7 +277,6 @@ async def analyze(args) -> int:
             print(f"    mean reasoning {stats.mean_reasoning_tokens} tok "
                   f"of {stats.mean_token_budget} budget, "
                   f"{stats.budget_overrun_plies} overruns")
-        side = "white" if name == built.white else "black"
         rj = built.rejections.get(side)
         if rj:
             print(f"    attempts {rj['total_attempts']}: {rj['accepted']} accepted, "

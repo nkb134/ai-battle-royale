@@ -138,3 +138,12 @@ def test_index_marks_which_matches_have_panic_data(tmp_path):
     assert by_id["m1"]["panic_plies"] == 9
     assert by_id["m2"]["has_report"] is False
     assert by_id["m2"]["panic_plies"] is None
+
+
+def test_a_mirror_match_keeps_the_two_sides_apart():
+    """Same model on both sides is the only way to get an evenly matched game, so
+    nothing downstream may identify a side by its name."""
+    plies = [ply(1, "white", 20), ply(2, "black", 400)]
+    w, b = _stats(plies, "white"), _stats(plies, "black")
+    assert w.acpl == 20.0 and b.acpl == 400.0
+    assert w.acpl != b.acpl
