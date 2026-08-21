@@ -1,0 +1,4 @@
+# Copy to arena.local.yaml and fill in. Never committed.
+vertex:
+  project: "your-gcp-project-id"
+  location: "us-central1"

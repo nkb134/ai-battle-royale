@@ -1,0 +1,23 @@
+# §16.3 — never commit raw model traffic, the db, or credentials. Do not loosen.
+arena/data/logs/
+arena/data/arena.db
+arena/data/arena.db-wal
+arena/data/arena.db-shm
+arena.local.yaml
+.env
+*.pem
+*.key
+
+# tooling
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+node_modules/
+dist/
+.DS_Store
+
+# fetched at setup time, not vendored
+arena/bin/

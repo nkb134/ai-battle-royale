@@ -1,0 +1,66 @@
+name: Deploy web app to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: arena/web/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: arena/web
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        working-directory: arena/web
+        run: pnpm build
+
+      # Replays live outside web/, so they are copied in at build time rather than
+      # duplicated in the repo (§16.2, §16.3).
+      - name: Bundle replays
+        run: |
+          mkdir -p arena/web/dist/replays
+          cp -r arena/data/replays/. arena/web/dist/replays/ 2>/dev/null || true
+          ls -la arena/web/dist/replays/ || true
+
+      # Pages has no server-side routing, so a copy of index.html answers deep links.
+      - name: SPA fallback
+        run: cp arena/web/dist/index.html arena/web/dist/404.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: arena/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

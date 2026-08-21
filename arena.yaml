@@ -1,0 +1,90 @@
+# Anything that can change a result lives here, and therefore lands in config_hash (§13).
+
+prompt_version: "PROMPT_V1"
+
+match:
+  legal_moves_provided: false   # §5.3 — off by default, on purpose
+  max_retries: 2
+  on_exhausted: "random_legal"  # or "forfeit"
+  max_plies: 250                # §5.4 hard cap
+
+pacing:                          # §6.3
+  reserve_fraction: 0.10
+  min_tokens: 120
+  max_tokens: 4000
+  panic_fraction: 0.20
+  panic_tokens: 250
+  critical_fraction: 0.10
+  move_tag_headroom: 96          # §6.2 — room for </move> past the thinking budget
+
+adjudicate:                      # §5.4
+  resign_cp: -900
+  resign_plies: 6
+  draw_cp: 50
+  draw_plies: 30
+
+analysis:                        # §8.1 — never varies within a rating pool
+  depth: 18
+  movetime_ms: 200
+  threads: 1
+  hash_mb: 128
+
+time_controls:                   # §6.4
+  quick:    { initial_ms: 600000,  increment_ms: 5000  }
+  standard: { initial_ms: 900000,  increment_ms: 10000 }
+  long:     { initial_ms: 1800000, increment_ms: 20000 }
+  casual:   { initial_ms: null,    increment_ms: 0, token_cap: 3000 }
+
+# tokens_per_sec is measured by `make calibrate`, never guessed (§6.3).
+# A null value means uncalibrated: the setup screen must warn (§6.4).
+models:
+  mock-fast:
+    provider: mock
+    model_string: "mock-fast-v1"
+    display_name: "Mock Fast"
+    tokens_per_sec: 120.0
+    active: true
+  mock-slow:
+    provider: mock
+    model_string: "mock-slow-v1"
+    display_name: "Mock Slow"
+    tokens_per_sec: 18.0
+    active: true
+  mock-drifted:
+    provider: mock
+    model_string: "mock-drifted-v1"
+    display_name: "Mock Drifted"
+    # Calibrated at 140, actually generating at 22. This is the §6.3 failure mode:
+    # a provider quietly slows down, the pacing controller keeps sizing budgets for
+    # the old throughput, and the model runs out of clock. Flag falls come from here.
+    tokens_per_sec: 140.0
+    actual_tokens_per_sec: 22.0
+    active: true
+
+  claude-vertex:
+    provider: vertex_anthropic
+    model_string: "claude-sonnet-4-5@20250929"
+    display_name: "Claude Sonnet 4.5"
+    tokens_per_sec: null
+    thinking: true
+    active: false
+  gemini-vertex:
+    provider: vertex_gemini
+    model_string: "gemini-2.5-pro"
+    display_name: "Gemini 2.5 Pro"
+    tokens_per_sec: null
+    thinking: true
+    active: false
+  gpt-oss-vertex:
+    provider: vertex_openai
+    model_string: "openai/gpt-oss-120b-maas"
+    display_name: "GPT-OSS 120B"
+    tokens_per_sec: null
+    thinking: false
+    active: false
+
+# Your GCP project does not belong in a public repo. Put it in arena.local.yaml,
+# which is gitignored and deep-merged over this file (§16.3).
+vertex:
+  project: null
+  location: "us-central1"
