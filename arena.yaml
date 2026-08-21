@@ -74,7 +74,7 @@ models:
     model_string: "gemini-2.5-pro"
     display_name: "Gemini 2.5 Pro"
     thinking: true
-    tokens_per_sec: 18.3
+    tokens_per_sec: 59.6
     active: true
   gemini-2.5-flash:
     provider: vertex_gemini
