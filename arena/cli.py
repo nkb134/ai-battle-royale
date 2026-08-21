@@ -9,6 +9,7 @@ import statistics
 import sys
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 
 from arena.analysis.stockfish import AnalysisConfig, EnginePool, engine_id
 from arena.config import Config
@@ -165,6 +166,7 @@ async def calibrate(args) -> int:
             opponent_clock_ms=900_000,
             increment_ms=10_000,
             token_budget=800,
+            max_output_tokens=800 + 320,
             retry_count=0,
             move_number=board.fullmove_number,
         )
@@ -235,9 +237,44 @@ def _write_tokens_per_sec(model_id: str, value: float) -> None:
     raise SystemExit(f"could not find models.{model_id}.tokens_per_sec in arena.yaml")
 
 
-def analyze(args) -> int:
-    print(f"analyze {args.game}: Phase 1, not yet built (§14)")
-    return 1
+async def analyze(args) -> int:
+    """Rebuild a full report from a stored PGN (§14 Phase 1 definition of done)."""
+    from arena.analysis import report as report_mod
+
+    cfg = Config.load()
+    path = report_mod.GAMES_DIR / f"{Path(args.game).name}.pgn"
+    if not path.exists():
+        raise SystemExit(f"no PGN at {path}")
+
+    pool = EnginePool(size=2, cfg=AnalysisConfig.from_dict(cfg.analysis))
+    try:
+        await pool.open()
+        built = await report_mod.build(path, pool)
+    finally:
+        await pool.close()
+
+    out = report_mod.write(built)
+    w, b = built.white_stats, built.black_stats
+    print(f"{built.match_id}  {built.white} vs {built.black}  {built.result}")
+    if built.opening_name:
+        print(f"  opening: {built.opening_eco} {built.opening_name} "
+              f"(left book at ply {built.left_book_at_ply})")
+    for name, stats in ((built.white, w), (built.black, b)):
+        print(f"  {name}:")
+        print(f"    ACPL {stats.acpl}  blunders {stats.blunders}  "
+              f"illegal {stats.illegal_moves}")
+        if stats.panic_plies:
+            print(f"    ACPL in panic {stats.acpl_panic} vs {stats.acpl_calm} "
+                  f"otherwise  ({stats.panic_plies} panic plies, "
+                  f"penalty {stats.panic_penalty}cp)")
+        else:
+            print("    never entered panic mode")
+        if stats.mean_reasoning_tokens is not None:
+            print(f"    mean reasoning {stats.mean_reasoning_tokens} tok "
+                  f"of {stats.mean_token_budget} budget, "
+                  f"{stats.budget_overrun_plies} overruns")
+    print(f"  written to {out}")
+    return 0
 
 
 def main(argv=None) -> int:
@@ -287,7 +324,7 @@ def main(argv=None) -> int:
     if args.cmd == "calibrate":
         return asyncio.run(calibrate(args))
     if args.cmd == "analyze":
-        return analyze(args)
+        return asyncio.run(analyze(args))
     if args.cmd == "index":
         path = write_index()
         print(json.loads(path.read_text())["matches"].__len__(), "replays indexed")

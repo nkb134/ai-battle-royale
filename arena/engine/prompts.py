@@ -62,7 +62,9 @@ Think about the position, then give your move as a UCI string inside a move tag,
 
 <move>e2e4</move>
 
-The move tag must be the last thing you write."""
+Keep what you write outside your thinking short, and end with the move tag. A reply
+that runs out of tokens before the tag counts as an illegal move, and costs you a
+retry and the time it took."""
 
 RETRY_SUFFIX = """
 

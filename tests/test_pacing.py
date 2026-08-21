@@ -56,10 +56,31 @@ def test_panic_boundary_is_exclusive_at_exactly_twenty_percent():
     assert budget(179_999).panic
 
 
-def test_hard_cap_leaves_room_for_the_move_tag():
-    """§6.2 — truncating at exactly the budget would eat the closing tag."""
+def test_plain_model_ceiling_leaves_room_for_the_move_tag():
+    """§6.2 — for a plain chat model the prose is the reasoning, so the budget is
+    the ceiling and only the tag needs room."""
     b = budget(900_000)
-    assert b.hard_cap == b.tokens + CFG.move_tag_headroom
+    assert b.hard_cap(separate_thinking_channel=False) == b.tokens + CFG.move_tag_headroom
+
+
+def test_thinking_model_ceiling_leaves_room_for_a_whole_answer():
+    """The bug real models found: Gemini and Anthropic bill thinking and the visible
+    answer against one ceiling. Tag-sized headroom means a model that spends its full
+    thinking budget is cut off before it ever writes <move> — a parse failure wearing
+    time pressure's clothes."""
+    b = budget(900_000)
+    assert b.hard_cap(separate_thinking_channel=True) == b.tokens + CFG.visible_allowance
+    assert b.hard_cap(separate_thinking_channel=True) > b.hard_cap(
+        separate_thinking_channel=False
+    )
+
+
+def test_the_ceiling_is_never_below_the_budget_even_in_panic():
+    """Panic shrinks the budget hard; the answer still has to fit."""
+    b = budget(80_000)  # critical
+    assert b.tokens == CFG.min_tokens
+    for separate in (True, False):
+        assert b.hard_cap(separate_thinking_channel=separate) > b.tokens
 
 
 def test_untimed_uses_flat_cap_and_never_panics():

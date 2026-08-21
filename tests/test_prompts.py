@@ -17,6 +17,7 @@ def ctx(**kw):
         opponent_clock_ms=900_000,
         increment_ms=10_000,
         token_budget=1200,
+        max_output_tokens=1520,
         retry_count=0,
         move_number=1,
     )

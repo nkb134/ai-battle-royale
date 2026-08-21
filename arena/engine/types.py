@@ -20,6 +20,9 @@ class MoveContext:
     opponent_clock_ms: int | None
     increment_ms: int
     token_budget: int
+    # The request's max-output ceiling for this move. Not the same as token_budget:
+    # see Budget.hard_cap for why the two differ by model type (§6.2).
+    max_output_tokens: int
     retry_count: int
     move_number: int
     panic: bool = False

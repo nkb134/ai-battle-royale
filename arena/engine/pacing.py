@@ -24,6 +24,7 @@ class PacingConfig:
     panic_tokens: int = 250
     critical_fraction: float = 0.10
     move_tag_headroom: int = 96
+    visible_allowance: int = 320
 
     @classmethod
     def from_dict(cls, d: dict) -> PacingConfig:
@@ -40,15 +41,27 @@ class Budget:
     expected_moves_left: int
     time_per_move_ms: int | None
     headroom: int = 96
+    visible_allowance: int = 320
 
-    @property
-    def hard_cap(self) -> int:
-        """The request's max output ceiling.
+    def hard_cap(self, *, separate_thinking_channel: bool) -> int:
+        """The request's max output ceiling, which is not the same as the budget.
 
-        Headroom above the reasoning budget so the closing `<move>` tag still fits
-        (§6.2). Capping a thinking model at exactly `tokens` truncates it mid-thought
-        and produces a parse failure, which is a different thing from playing fast.
+        §6.2 caps *reasoning*. What the ceiling has to be depends on whether the
+        provider separates thinking from the answer:
+
+        * **Separate channel** (Gemini `thinking_budget`, Anthropic `budget_tokens`).
+          The reasoning budget is enforced by that field. But the request ceiling on
+          these APIs counts thinking *and* the visible answer together, so it must
+          leave room for a whole short answer, not just the closing tag. Leaving only
+          tag-sized headroom means a model that spends its full thinking budget is cut
+          off before it ever writes `<move>`, which is a parse failure dressed up as
+          time pressure — a different thing, and a much less honest one.
+
+        * **No separate channel** (gpt-oss, any plain chat model). The visible prose
+          *is* the reasoning, so the budget is the ceiling and only the tag needs room.
         """
+        if separate_thinking_channel:
+            return self.tokens + self.visible_allowance
         return self.tokens + self.headroom
 
 
@@ -75,6 +88,7 @@ def compute_budget(
             expected_moves_left=0,
             time_per_move_ms=None,
             headroom=cfg.move_tag_headroom,
+            visible_allowance=cfg.visible_allowance,
         )
 
     if tokens_per_sec <= 0:
@@ -105,6 +119,7 @@ def compute_budget(
         expected_moves_left=expected_moves_left,
         time_per_move_ms=int(time_per_move_ms),
         headroom=cfg.move_tag_headroom,
+        visible_allowance=cfg.visible_allowance,
     )
 
 

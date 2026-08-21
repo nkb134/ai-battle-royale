@@ -15,7 +15,11 @@ pacing:                          # §6.3
   panic_fraction: 0.20
   panic_tokens: 250
   critical_fraction: 0.10
-  move_tag_headroom: 96          # §6.2 — room for </move> past the thinking budget
+  move_tag_headroom: 96          # §6.2 — plain chat models: room for </move> only
+  # Models with a separate thinking channel bill thinking and answer against one
+  # ceiling, so the request must leave room for a whole short answer or the model is
+  # cut off before it writes <move>. See Budget.hard_cap.
+  visible_allowance: 320
 
 adjudicate:                      # §5.4
   resign_cp: -900

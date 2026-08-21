@@ -54,12 +54,13 @@ class VertexAnthropicAdapter(BaseAdapter):
         client = self._get_client()
 
         budget = ctx.token_budget
-        headroom = self.options.get("headroom", 96)
         use_thinking = self.thinking and budget >= MIN_THINKING_BUDGET
 
+        # Anthropic also counts thinking inside max_tokens, so the ceiling has to
+        # clear the thinking budget by a whole short answer, not just the tag.
         kwargs: dict = {
             "model": self.model_string,
-            "max_tokens": budget + headroom,
+            "max_tokens": ctx.max_output_tokens,
             "messages": [{"role": "user", "content": prompt}],
         }
         if use_thinking:

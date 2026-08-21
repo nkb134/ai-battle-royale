@@ -209,6 +209,9 @@ class Match:
                 ),
                 increment_ms=self.clock.increment_ms,
                 token_budget=budget.tokens,
+                max_output_tokens=budget.hard_cap(
+                    separate_thinking_channel=getattr(adapter, "thinking", False)
+                ),
                 retry_count=attempt,
                 move_number=self.board.fullmove_number,
                 panic=budget.panic,

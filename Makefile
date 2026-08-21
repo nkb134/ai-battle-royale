@@ -1,4 +1,4 @@
-.PHONY: setup serve web web-build replays dev match analyze calibrate test lint fmt
+.PHONY: setup serve web web-build replays dev match analyze analyze-all calibrate test lint fmt
 
 PY := .venv/bin/python
 
@@ -36,6 +36,12 @@ match:
 
 analyze:
 	$(PY) -m arena.cli analyze --game $(GAME)
+
+analyze-all:
+	@for f in arena/data/games/*.pgn; do \
+		id=$$(basename $$f .pgn); \
+		$(PY) -m arena.cli analyze --game $$id || exit 1; \
+	done
 
 calibrate:
 	$(PY) -m arena.cli calibrate --model $(MODEL)

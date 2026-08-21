@@ -50,12 +50,13 @@ class VertexGeminiAdapter(BaseAdapter):
 
         prompt = render(ctx)
         client = self._get_client()
-        headroom = self.options.get("headroom", 96)
 
+        # Gemini bills thinking and the visible answer against one ceiling, so
+        # max_output_tokens must exceed thinking_budget by a whole short answer.
         config = gt.GenerateContentConfig(
             temperature=self.temperature,
             seed=self.seed,
-            max_output_tokens=ctx.token_budget + headroom,
+            max_output_tokens=ctx.max_output_tokens,
             thinking_config=gt.ThinkingConfig(
                 thinking_budget=ctx.token_budget if self.thinking else 0,
                 include_thoughts=False,

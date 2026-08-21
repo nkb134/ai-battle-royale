@@ -13,6 +13,12 @@ Phase 3. Nothing added yet.
 |---|---|---|---|
 | _(none yet)_ | | | |
 
+## Opening data
+
+| File | Source | Licence | Notes |
+|---|---|---|---|
+| `eco/{a-e}.tsv` | [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings) | CC0-1.0 | ECO codes and opening names, used by §8.4 |
+
 ## Board and pieces
 
 | File | Source | Licence | Notes |

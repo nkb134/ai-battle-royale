@@ -78,8 +78,7 @@ class OpenAIAdapter(BaseAdapter):
     async def move(self, ctx: MoveContext) -> RawMoveResponse:
         prompt = render(ctx)
         client = self._get_client()
-        headroom = self.options.get("headroom", 96)
-        ceiling = ctx.token_budget + headroom
+        ceiling = ctx.max_output_tokens
 
         kwargs: dict = {
             "model": self.model_string,

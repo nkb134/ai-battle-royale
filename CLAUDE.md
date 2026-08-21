@@ -443,7 +443,8 @@ A replay of an adjudicated or flagged game is still tagged as such.
 
 ### 16.3 What is committed
 
-Committed: source, `arena/data/games/*.pgn`, `arena/data/replays/*.json`.
+Committed: source, `arena/data/games/*.pgn`, `arena/data/replays/*.json`,
+`arena/data/reports/*.json`, `arena/data/eco/*.tsv`.
 
 **Never committed:** `arena/data/logs/*.jsonl`, `arena/data/arena.db`, `arena.local.yaml`, or any
 credential. The JSONL logs hold every raw prompt and response untruncated (§4) and the repo is
