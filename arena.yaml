@@ -61,26 +61,69 @@ models:
     actual_tokens_per_sec: 22.0
     active: true
 
-  claude-vertex:
-    provider: vertex_anthropic
-    model_string: "claude-sonnet-4-5@20250929"
-    display_name: "Claude Sonnet 4.5"
-    tokens_per_sec: null
-    thinking: true
-    active: false
-  gemini-vertex:
+  # --- Vertex AI, probed against the project on 2026-08-21 ---------------
+  # tokens_per_sec is null until `make calibrate MODEL=<id>` measures it. The setup
+  # screen and the API both refuse an uncalibrated model rather than guess (§6.3).
+
+  gemini-2.5-pro:
     provider: vertex_gemini
     model_string: "gemini-2.5-pro"
     display_name: "Gemini 2.5 Pro"
-    tokens_per_sec: null
     thinking: true
-    active: false
-  gpt-oss-vertex:
+    tokens_per_sec: 18.3
+    active: true
+  gemini-2.5-flash:
+    provider: vertex_gemini
+    model_string: "gemini-2.5-flash"
+    display_name: "Gemini 2.5 Flash"
+    thinking: true
+    tokens_per_sec: 34.0
+    active: true
+  gemini-2.5-flash-lite:
+    provider: vertex_gemini
+    model_string: "gemini-2.5-flash-lite"
+    display_name: "Gemini 2.5 Flash Lite"
+    # Reports no thinking tokens at all, so its told budget and its enforced budget
+    # are the same number. A useful control against the Pro entry above.
+    thinking: false
+    tokens_per_sec: 152.0
+    active: true
+  gpt-oss-120b:
     provider: vertex_openai
     model_string: "openai/gpt-oss-120b-maas"
     display_name: "GPT-OSS 120B"
+    # Not an OpenAI reasoning-API model: it takes a plain max_tokens cap and returns
+    # its chain of thought in reasoning_content.
+    reasoning: false
     tokens_per_sec: null
-    thinking: false
+    active: true
+  gpt-oss-20b:
+    provider: vertex_openai
+    model_string: "openai/gpt-oss-20b-maas"
+    display_name: "GPT-OSS 20B"
+    reasoning: false
+    tokens_per_sec: null
+    active: true
+
+  # Claude is enabled on Vertex for this project but sits at zero quota: requests
+  # return 429 RESOURCE_EXHAUSTED against
+  # online_prediction_input_tokens_per_minute_per_base_model. Inactive until a quota
+  # increase is granted, not because the adapter is unfinished.
+  claude-sonnet-4-5:
+    provider: vertex_anthropic
+    model_string: "claude-sonnet-4-5@20250929"
+    display_name: "Claude Sonnet 4.5"
+    location: "global"
+    thinking: true
+    tokens_per_sec: null
+    active: false
+  claude-haiku-4-5:
+    provider: vertex_anthropic
+    model_string: "claude-haiku-4-5@20251001"
+    display_name: "Claude Haiku 4.5"
+    location: "us-east5"
+    thinking: true
+    tokens_per_sec: null
     active: false
 
 # Your GCP project does not belong in a public repo. Put it in arena.local.yaml,

@@ -102,6 +102,12 @@ class OpenAIAdapter(BaseAdapter):
         usage = getattr(resp, "usage", None)
         details = getattr(usage, "completion_tokens_details", None)
 
+        # gpt-oss on Vertex returns its chain of thought in `reasoning_content` and
+        # does not break reasoning out in the usage details. Log the text, but leave
+        # reasoning_tokens as None rather than estimating from it: §13 says count on
+        # completion from the usage field, never estimate.
+        reasoning_text = getattr(choice.message, "reasoning_content", None)
+
         return RawMoveResponse(
             text=choice.message.content or "",
             reasoning_tokens=getattr(details, "reasoning_tokens", None),
@@ -111,6 +117,7 @@ class OpenAIAdapter(BaseAdapter):
                 "finish_reason": choice.finish_reason,
                 "told_budget": ctx.token_budget,
                 "reasoning_effort": kwargs.get("reasoning_effort"),
+                "reasoning_content": reasoning_text,
             },
         )
 

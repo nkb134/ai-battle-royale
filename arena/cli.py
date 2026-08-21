@@ -181,10 +181,58 @@ async def calibrate(args) -> int:
 
     if not samples:
         raise SystemExit("no usable samples; the provider returned no token counts")
+
+    # Median, not mean: one stalled request should not drag the figure down (§6.3).
     median = statistics.median(samples)
+    previous = spec.get("tokens_per_sec")
+    if previous:
+        # Rolling: smooth against the last measurement so one noisy run cannot swing
+        # the pacing controller, while a genuine throughput change still lands within
+        # a couple of recalibrations. Providers change throughput without saying so
+        # (§6.3), so this must track real drift rather than pin the old figure.
+        median = 0.6 * median + 0.4 * float(previous)
     print(f"\n{args.model}: tokens_per_sec = {median:.1f}  (n={len(samples)})")
-    print(f"Set this in arena.yaml under models.{args.model}.tokens_per_sec")
+    if previous:
+        print(f"  previous: {previous}")
+
+    if args.write:
+        _write_tokens_per_sec(args.model, round(median, 1))
+        print(f"  written to arena.yaml under models.{args.model}.tokens_per_sec")
+    else:
+        print(f"  not written (--no-write). Set it under models.{args.model}")
     return 0
+
+
+def _write_tokens_per_sec(model_id: str, value: float) -> None:
+    """Patch one scalar in arena.yaml, preserving comments and ordering.
+
+    A round-trip through yaml.safe_load would strip every comment in the file, and
+    those comments carry the reasoning behind the config. So edit the line in place.
+    """
+    from arena.config import DEFAULT_CONFIG
+
+    lines = DEFAULT_CONFIG.read_text().splitlines(keepends=True)
+    in_models = False
+    in_model = False
+    for i, line in enumerate(lines):
+        if line.startswith("models:"):
+            in_models = True
+            continue
+        if in_models and line and not line[0].isspace():
+            break  # left the models block
+        if in_models and line.strip().rstrip(":") == model_id and line.startswith("  "):
+            in_model = True
+            continue
+        if in_model:
+            if line.strip().startswith("tokens_per_sec:"):
+                indent = line[: len(line) - len(line.lstrip())]
+                lines[i] = f"{indent}tokens_per_sec: {value}\n"
+                DEFAULT_CONFIG.write_text("".join(lines))
+                return
+            # A new sibling model started before we found the key.
+            if line.strip() and not line.startswith("    "):
+                break
+    raise SystemExit(f"could not find models.{model_id}.tokens_per_sec in arena.yaml")
 
 
 def analyze(args) -> int:
@@ -219,6 +267,8 @@ def main(argv=None) -> int:
     c = sub.add_parser("calibrate", help="measure tokens/sec (§6.3)")
     c.add_argument("--model", required=True)
     c.add_argument("--samples", type=int, default=20)
+    c.add_argument("--no-write", dest="write", action="store_false",
+                   help="print the measurement without updating arena.yaml")
 
     a = sub.add_parser("analyze", help="re-run analysis on a stored game")
     a.add_argument("--game", required=True)

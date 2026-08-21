@@ -24,6 +24,12 @@ def build_adapter(model_id: str, spec: dict, *, vertex: dict | None = None, **ov
     kw = {k: v for k, v in spec.items() if k not in identity_keys}
     kw.update(overrides)
 
+    # A model may pin its own region — Claude on Vertex is not served from every
+    # location, and the right one differs per model. The model's own setting wins
+    # over the project default.
+    location = kw.pop("location", None) or vertex.get("location", "us-central1")
+    project = vertex.get("project")
+
     if provider == "mock":
         from arena.engine.adapters.mock import MockAdapter
 
@@ -38,22 +44,14 @@ def build_adapter(model_id: str, spec: dict, *, vertex: dict | None = None, **ov
         from arena.engine.adapters.vertex_anthropic import VertexAnthropicAdapter
 
         return VertexAnthropicAdapter(
-            model_id,
-            model_string,
-            project=vertex.get("project"),
-            location=vertex.get("location", "us-central1"),
-            **kw,
+            model_id, model_string, project=project, location=location, **kw
         )
 
     if provider == "vertex_gemini":
         from arena.engine.adapters.vertex_gemini import VertexGeminiAdapter
 
         return VertexGeminiAdapter(
-            model_id,
-            model_string,
-            project=vertex.get("project"),
-            location=vertex.get("location", "us-central1"),
-            **kw,
+            model_id, model_string, project=project, location=location, **kw
         )
 
     if provider in {"vertex_openai", "openai"}:
@@ -63,8 +61,8 @@ def build_adapter(model_id: str, spec: dict, *, vertex: dict | None = None, **ov
             model_id,
             model_string,
             vertex=(provider == "vertex_openai"),
-            project=vertex.get("project"),
-            location=vertex.get("location", "us-central1"),
+            project=project,
+            location=location,
             **kw,
         )
 
