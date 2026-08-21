@@ -261,3 +261,53 @@ async def test_genuinely_unparseable_notation_is_still_refused():
     assert m._parse_notation("the knight one") is None
     assert m._parse_notation("") is None
     assert m._parse_notation("zz9z9") is None
+
+
+async def test_illegal_san_is_labelled_illegal_not_unparseable():
+    """The two are different findings and §4's log is the research record.
+
+    python-chess raises IllegalMoveError for well-formed notation naming a move that
+    is not available, and InvalidMoveError for genuine nonsense. Catching plain
+    ValueError collapsed the two: a real Gemini match recorded 30 ordinary illegal
+    SAN moves (Bf2, Ka1, Ke7) as 'unparseable', which understates illegal moves per
+    100 plies (§11) and overstates a parser problem that was not happening.
+    """
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"))
+    # Ke7 is well-formed and illegal from the starting position.
+    _, why = m._interpret(RawMoveResponse(text="<move>Ke7</move>",
+                                          reasoning_tokens=1, output_tokens=1))
+    assert why is not None and why.startswith("illegal")
+
+    _, why = m._interpret(RawMoveResponse(text="<move>Ngf6xa8</move>",
+                                          reasoning_tokens=1, output_tokens=1))
+    assert why is not None and why.startswith("unparseable")
+
+
+async def test_castling_notation_is_illegal_when_castling_is_not_available():
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"))
+    _, why = m._interpret(RawMoveResponse(text="<move>O-O</move>",
+                                          reasoning_tokens=1, output_tokens=1))
+    assert why is not None and why.startswith("illegal")
+
+
+async def test_ambiguous_notation_is_reported_as_ambiguous():
+    """Two pieces could reach the square, so the model has not named a move."""
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"))
+    # Rooks on a1 and h1 with nothing between them and d1: both can go there.
+    m.board = chess.Board("4k3/8/8/8/4K3/8/8/R6R w - - 0 1")
+    _, why = m._interpret(RawMoveResponse(text="<move>Rd1</move>",
+                                          reasoning_tokens=1, output_tokens=1))
+    assert why is not None and why.startswith("ambiguous")
+
+
+async def test_long_algebraic_is_case_insensitive():
+    """Models write 'rc7e7' as well as 'Rc7e7'."""
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"))
+    assert m._parse_notation("ng1f3") == chess.Move.from_uci("g1f3")
+    assert m._parse_notation("Ng1f3") == chess.Move.from_uci("g1f3")
+
+
+async def test_castling_when_it_is_legal_still_works():
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"))
+    m.board = chess.Board("4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1")
+    assert m._parse_notation("O-O") == chess.Move.from_uci("e1g1")
