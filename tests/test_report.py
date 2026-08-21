@@ -103,3 +103,38 @@ def test_opening_is_named_and_reports_where_book_ended():
 
 def test_an_unbookish_opening_still_resolves_or_returns_none():
     assert identify(["a2a4"]) is not None or identify(["a2a4"]) is None
+
+
+def test_index_marks_which_matches_have_panic_data(tmp_path):
+    """A match where the clock never bit has nothing to say about time pressure, and
+    the archive should say so before a reader opens the report (§8.4)."""
+    import json
+
+    from arena.engine.events import write_index
+
+    replays = tmp_path / "replays"
+    reports = tmp_path / "reports"
+    replays.mkdir()
+    reports.mkdir()
+
+    (replays / "m1.json").write_text(json.dumps({
+        "match_id": "m1", "white": "a", "black": "b", "time_control": "10+5",
+        "result": "1-0", "termination": "flag_fall", "adjudicated": False,
+        "ply_count": 40, "started_at": "2026-01-01T00:00:00Z", "events": [],
+    }))
+    (reports / "m1.json").write_text(json.dumps({
+        "white_stats": {"panic_plies": 9}, "black_stats": {"panic_plies": 0},
+    }))
+    # A replay with no report at all.
+    (replays / "m2.json").write_text(json.dumps({
+        "match_id": "m2", "white": "a", "black": "b", "time_control": "10+5",
+        "result": "0-1", "termination": "checkmate", "adjudicated": False,
+        "ply_count": 20, "started_at": "2026-01-02T00:00:00Z", "events": [],
+    }))
+
+    index = json.loads(write_index(replays).read_text())
+    by_id = {m["match_id"]: m for m in index["matches"]}
+    assert by_id["m1"]["has_report"] is True
+    assert by_id["m1"]["panic_plies"] == 9
+    assert by_id["m2"]["has_report"] is False
+    assert by_id["m2"]["panic_plies"] is None

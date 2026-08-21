@@ -284,3 +284,5 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .
 .stats thead th { color: var(--muted); font-weight: 600; }
 .stats tbody th { text-align: left; font-weight: 400; color: var(--muted); }
 .stats td { font-variant-numeric: tabular-nums; }
+
+.panic-flag { color: var(--panic); font-style: normal; }

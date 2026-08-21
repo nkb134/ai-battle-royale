@@ -76,14 +76,32 @@ def write_index(directory: Path | None = None) -> Path:
     """
     directory = directory or REPLAY_DIR
     directory.mkdir(parents=True, exist_ok=True)
+    reports_dir = directory.parent / "reports"
     entries = []
     for path in sorted(directory.glob("*.json")):
         if path.name == "index.json":
             continue
         data = json.loads(path.read_text())
+        # A match only has a report once `make analyze` has run. Surfacing whether one
+        # exists — and whether it has any panic plies at all — saves opening a report
+        # to find out there is nothing in it.
+        report_path = reports_dir / path.name
+        has_report = report_path.exists()
+        panic_plies = None
+        if has_report:
+            try:
+                report = json.loads(report_path.read_text())
+                panic_plies = (
+                    report.get("white_stats", {}).get("panic_plies", 0)
+                    + report.get("black_stats", {}).get("panic_plies", 0)
+                )
+            except (json.JSONDecodeError, OSError):
+                has_report = False
         entries.append(
             {
                 "match_id": data.get("match_id"),
+                "has_report": has_report,
+                "panic_plies": panic_plies,
                 "white": data.get("white"),
                 "black": data.get("black"),
                 "time_control": data.get("time_control"),

@@ -91,15 +91,25 @@ export function SetupScreen({
                     <em className="qualifier"> · {qualifier(entry)}</em>
                   )}
                 </span>
-                <span className="archive-plies">{entry.ply_count} plies</span>
+                <span className="archive-plies">
+                  {entry.ply_count} plies
+                  {/* The clock only tells you something when it actually bit. */}
+                  {entry.panic_plies ? (
+                    <em className="panic-flag" title="Plies played under panic mode">
+                      {" "}· {entry.panic_plies} in panic
+                    </em>
+                  ) : null}
+                </span>
               </button>
-              <button
-                className="archive-report link"
-                onClick={() => onOpenReport(entry.match_id)}
-                title="Post-match report"
-              >
-                report
-              </button>
+              {entry.has_report !== false && (
+                <button
+                  className="archive-report link"
+                  onClick={() => onOpenReport(entry.match_id)}
+                  title="Post-match report"
+                >
+                  report
+                </button>
+              )}
             </li>
           ))}
         </ul>

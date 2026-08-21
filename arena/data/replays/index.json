@@ -2,6 +2,8 @@
  "matches": [
   {
    "match_id": "3dd0498f7818",
+   "has_report": true,
+   "panic_plies": 0,
    "white": "gemini-2.5-flash",
    "black": "gemini-2.5-flash-lite",
    "time_control": "15+10",
@@ -13,6 +15,8 @@
   },
   {
    "match_id": "af29ea98e195",
+   "has_report": true,
+   "panic_plies": 15,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -24,6 +28,8 @@
   },
   {
    "match_id": "9a05bdcd6826",
+   "has_report": true,
+   "panic_plies": 0,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -35,6 +41,8 @@
   },
   {
    "match_id": "a3daab6a61f4",
+   "has_report": true,
+   "panic_plies": 15,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -46,6 +54,8 @@
   },
   {
    "match_id": "950741c642ed",
+   "has_report": true,
+   "panic_plies": 14,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -57,6 +67,8 @@
   },
   {
    "match_id": "5be008922e18",
+   "has_report": true,
+   "panic_plies": 16,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -68,6 +80,8 @@
   },
   {
    "match_id": "e9d973d0ffcc",
+   "has_report": true,
+   "panic_plies": 14,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -79,6 +93,8 @@
   },
   {
    "match_id": "b53f91edf493",
+   "has_report": true,
+   "panic_plies": 16,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -90,6 +106,8 @@
   },
   {
    "match_id": "952748e6a01a",
+   "has_report": true,
+   "panic_plies": 15,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -101,6 +119,8 @@
   },
   {
    "match_id": "dc844a5b318a",
+   "has_report": true,
+   "panic_plies": 14,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
@@ -112,6 +132,8 @@
   },
   {
    "match_id": "89f5b8095fe7",
+   "has_report": true,
+   "panic_plies": 15,
    "white": "mock-fast",
    "black": "mock-drifted",
    "time_control": "1+0",
