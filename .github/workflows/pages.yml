@@ -40,11 +40,18 @@ jobs:
 
       # Replays live outside web/, so they are copied in at build time rather than
       # duplicated in the repo (§16.2, §16.3).
+      # An archive with nothing in it is a valid state, so always emit an index.
+      # Without one the client gets a 404 and reports a broken site instead of an
+      # empty one.
       - name: Bundle replays
         run: |
           mkdir -p arena/web/dist/replays
           cp -r arena/data/replays/. arena/web/dist/replays/ 2>/dev/null || true
-          ls -la arena/web/dist/replays/ || true
+          if [ ! -f arena/web/dist/replays/index.json ]; then
+            echo '{"matches":[]}' > arena/web/dist/replays/index.json
+          fi
+          echo "replays bundled:"
+          ls -1 arena/web/dist/replays/ | wc -l
 
       # Pages has no server-side routing, so a copy of index.html answers deep links.
       - name: SPA fallback

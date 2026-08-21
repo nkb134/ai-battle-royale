@@ -5,7 +5,6 @@ test machine happens to be.
 """
 
 import chess
-import pytest
 
 from arena.config import TimeControl
 from arena.engine.adapters.mock import MockAdapter

@@ -1,0 +1,15 @@
+{
+ "matches": [
+  {
+   "match_id": "89f5b8095fe7",
+   "white": "mock-fast",
+   "black": "mock-drifted",
+   "time_control": "1+0",
+   "result": "1-0",
+   "termination": "flag_fall",
+   "adjudicated": false,
+   "ply_count": 118,
+   "started_at": "2026-08-21T15:27:28.407761+00:00"
+  }
+ ]
+}
