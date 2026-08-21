@@ -111,6 +111,8 @@ class OpenAIAdapter(BaseAdapter):
             text=choice.message.content or "",
             reasoning_tokens=getattr(details, "reasoning_tokens", None),
             output_tokens=getattr(usage, "completion_tokens", None),
+            # completion_tokens already includes reasoning on this API.
+            total_output_tokens=getattr(usage, "completion_tokens", None),
             truncated=choice.finish_reason == "length",
             raw={
                 "finish_reason": choice.finish_reason,

@@ -87,10 +87,13 @@ class VertexAnthropicAdapter(BaseAdapter):
 
         return RawMoveResponse(
             text=text,
-            # Anthropic bills thinking inside output_tokens and does not break it out,
-            # so reasoning is only what is left once the visible answer is removed.
-            reasoning_tokens=output_tokens,
+            # Anthropic bills thinking inside output_tokens and does not break it
+            # out, so there is no honest thinking-only figure to report here. The
+            # total is what output_tokens already is; claiming it as "reasoning"
+            # would overstate thinking on every non-thinking reply.
+            reasoning_tokens=None,
             output_tokens=output_tokens,
+            total_output_tokens=output_tokens,
             truncated=getattr(msg, "stop_reason", None) == "max_tokens",
             raw={
                 "stop_reason": getattr(msg, "stop_reason", None),

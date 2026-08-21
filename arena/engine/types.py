@@ -38,11 +38,30 @@ class RawMoveResponse:
     """What an adapter hands back. The raw text is logged untruncated (§4)."""
 
     text: str
+    #: Thinking tokens alone, when the provider breaks them out. None when it does not.
     reasoning_tokens: int | None
+    #: The visible reply, or everything generated when the provider bundles the two.
     output_tokens: int | None
+    #: Everything generated, thinking included. Set explicitly by adapters whose
+    #: provider already bundles thinking into output_tokens, so it is not counted
+    #: twice. Left None where the sum below is correct.
+    total_output_tokens: int | None = None
     truncated: bool = False
     error: str | None = None
     raw: dict = field(default_factory=dict)
+
+    @property
+    def generated_tokens(self) -> int | None:
+        """Every token the provider generated for this move.
+
+        This, not the visible reply, is what latency is proportional to (§6.2), so
+        this is what calibration divides by elapsed time (§6.3).
+        """
+        if self.total_output_tokens is not None:
+            return self.total_output_tokens
+        if self.reasoning_tokens is None and self.output_tokens is None:
+            return None
+        return (self.reasoning_tokens or 0) + (self.output_tokens or 0)
 
 
 class ModelAdapter(Protocol):

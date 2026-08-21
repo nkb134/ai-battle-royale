@@ -174,7 +174,8 @@ async def calibrate(args) -> int:
         start = time.monotonic()
         resp = await adapter.move(ctx)
         elapsed = time.monotonic() - start
-        tokens = resp.output_tokens or resp.reasoning_tokens
+        # Everything generated, thinking included — not just the visible reply.
+        tokens = resp.generated_tokens
         if tokens and elapsed > 0:
             samples.append(tokens / elapsed)
             print(f"  sample {i + 1}/{args.samples}: {tokens} tok in {elapsed:.1f}s")
