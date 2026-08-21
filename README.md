@@ -20,8 +20,13 @@ such and never dressed up as clean wins.
 
 ## Status
 
-Phase 0 (headless match with a real clock) is built. The stream UI is Phase 2 and not
-yet written. See `CLAUDE.md` §14 for the build order.
+Phases 0, 1 and 2 are built: the headless match engine with a real clock, Stockfish
+annotation and the post-match report, and the stream UI. Sound, faces and taunts
+(phases 3 to 5) are not written yet, so the player boxes show placeholder squares.
+
+Models available: Gemini 2.5 Pro, Flash and Flash-Lite, and gpt-oss 120b/20b, all on
+Vertex. Claude is configured but inactive — it is enabled on Vertex yet sits at zero
+quota, so requests return 429 until a quota increase is granted.
 
 ## Running it
 
@@ -31,16 +36,28 @@ make test
 make match ARGS="--white mock-fast --black mock-drifted --tc 15+10"
 ```
 
-`mock-*` models play locally with no API calls. To use real models, set the ones you
-want `active` in `arena.yaml`, authenticate, and calibrate:
+`mock-*` models play locally with no API calls, which is what the test suite uses. To
+use real models, authenticate and calibrate:
 
 ```bash
 gcloud auth application-default login
-make calibrate MODEL=claude-vertex
+cp arena.local.yaml.example arena.local.yaml   # then put your GCP project in it
+make calibrate MODEL=gemini-2.5-flash
 ```
 
 Calibration is required. The pacing controller needs a measured `tokens_per_sec` and
 refuses to guess one.
+
+## Reports
+
+```bash
+make analyze GAME=<match_id>     # rebuilds a full report from the stored PGN
+make analyze-all
+```
+
+The report leads with ACPL in panic mode against ACPL for the rest of the game. That
+comparison is the point of the clock system: it is where you see whether being forced
+to reason less actually made a model play worse.
 
 ## Watching matches
 
