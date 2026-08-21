@@ -23,6 +23,7 @@ import chess.pgn
 
 from arena.analysis.annotate import classify
 from arena.analysis.eco import identify
+from arena.analysis.relabel import breakdown as rejection_breakdown
 from arena.analysis.stockfish import EnginePool, cp_loss
 from arena.config import DATA_DIR
 
@@ -118,6 +119,10 @@ class Report:
     key_moments: list[KeyMoment] = field(default_factory=list)
     white_stats: SideStats = field(default_factory=SideStats)
     black_stats: SideStats = field(default_factory=SideStats)
+    #: Why each response was refused, recomputed from the raw log under the current
+    #: parser rather than trusted from the label written at match time (§4).
+    #: Empty when no log is present — a report must still build from a PGN alone.
+    rejections: dict = field(default_factory=dict)
 
 
 def _tag_int(comment: str, key: str) -> int | None:
@@ -199,6 +204,10 @@ async def build(pgn_path: Path, pool: EnginePool) -> Report:
         white_stats=_stats(plies, "white"),
         black_stats=_stats(plies, "black"),
         key_moments=_key_moments(plies),
+        rejections={
+            side: stats.as_dict()
+            for side, stats in rejection_breakdown(pgn_path.stem).items()
+        },
     )
     return report
 

@@ -1,6 +1,17 @@
 {
  "matches": [
   {
+   "match_id": "3dd0498f7818",
+   "white": "gemini-2.5-flash",
+   "black": "gemini-2.5-flash-lite",
+   "time_control": "15+10",
+   "result": "1-0",
+   "termination": "adjudicated_resignation",
+   "adjudicated": true,
+   "ply_count": 94,
+   "started_at": "2026-08-21T16:03:30.335647+00:00"
+  },
+  {
    "match_id": "af29ea98e195",
    "white": "mock-fast",
    "black": "mock-drifted",

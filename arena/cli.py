@@ -274,6 +274,14 @@ async def analyze(args) -> int:
             print(f"    mean reasoning {stats.mean_reasoning_tokens} tok "
                   f"of {stats.mean_token_budget} budget, "
                   f"{stats.budget_overrun_plies} overruns")
+        side = "white" if name == built.white else "black"
+        rj = built.rejections.get(side)
+        if rj:
+            print(f"    attempts {rj['total_attempts']}: {rj['accepted']} accepted, "
+                  f"{rj['illegal']} illegal, {rj['unparseable']} unparseable, "
+                  f"{rj['truncated_no_tag']} truncated")
+            if rj["relabelled"]:
+                print(f"    relabelled from the log: {rj['relabelled']}")
     print(f"  written to {out}")
     return 0
 

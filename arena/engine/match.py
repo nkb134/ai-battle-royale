@@ -34,6 +34,7 @@ from arena.engine.adjudicate import (
 from arena.engine.clock import BLACK, WHITE, Clock, FlagFall
 from arena.engine.events import EventStream
 from arena.engine.jsonl import JsonlLog
+from arena.engine.notation import parse_notation
 from arena.engine.pacing import PacingConfig, compute_budget
 from arena.engine.prompts import MoveParseError, parse_move
 from arena.engine.types import ModelAdapter, MoveContext, ProviderError
@@ -353,49 +354,10 @@ class Match:
         return move, None
 
     def _parse_notation(self, text: str) -> chess.Move | None:
-        return self._parse_notation_detailed(text)[0]
+        return parse_notation(self.board, text)[0]
 
     def _parse_notation_detailed(self, text: str) -> tuple[chess.Move | None, str]:
-        """Accept UCI, SAN, or long algebraic, and say *why* when refusing.
-
-        The prompt asks for UCI, and most of the time that is what comes back. But
-        models also write `Nc6`, `Nb8c6` and `rc7e7`, and each names exactly one move.
-        Rejecting those would make this a test of format compliance rather than of
-        chess, which is not what the retry policy is for (§5.3).
-
-        The refusal reason matters as much as the refusal. "This move is not legal
-        here" and "this is not a move" are different findings about a model, and §4's
-        log is the record they are read from. python-chess separates them by exception
-        type; catching plain ValueError collapses the two, and a real match then
-        reported 30 ordinary illegal SAN moves as parser failures.
-        """
-        candidate = text.strip().rstrip("+#")
-
-        for attempt in (candidate, candidate.lower()):
-            try:
-                return chess.Move.from_uci(attempt), ""
-            except ValueError:
-                pass
-
-        # Long algebraic: a piece letter in front of an otherwise valid UCI move.
-        # Case-insensitive, because models write both `Rc7e7` and `rc7e7`. Tried
-        # after plain UCI, so a real UCI move like `b1c3` is never mistaken for one.
-        if len(candidate) >= 5 and candidate[0].upper() in "KQRBNP":
-            try:
-                return chess.Move.from_uci(candidate[1:].lower()), ""
-            except ValueError:
-                pass
-
-        try:
-            return self.board.parse_san(candidate), ""
-        except chess.IllegalMoveError:
-            return None, "illegal"
-        except chess.AmbiguousMoveError:
-            return None, "ambiguous"
-        except chess.InvalidMoveError:
-            return None, "unparseable"
-        except ValueError:
-            return None, "unparseable"
+        return parse_notation(self.board, text)
 
     def _random_legal(self) -> chess.Move:
         import random
