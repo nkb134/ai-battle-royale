@@ -179,6 +179,7 @@ class Match:
     async def _play_ply(self, ply: int) -> Outcome | None:
         side = self._side()
         adapter = self.adapters[side]
+        thinks_separately = bool(getattr(adapter, "thinking", False))
         budget = self._budget(side)
         fen_before = self.board.fen()
         clock_before = self.clock.remaining_ms(side)
@@ -210,8 +211,9 @@ class Match:
                 increment_ms=self.clock.increment_ms,
                 token_budget=budget.tokens,
                 max_output_tokens=budget.hard_cap(
-                    separate_thinking_channel=getattr(adapter, "thinking", False)
+                    separate_thinking_channel=thinks_separately
                 ),
+                separate_thinking_channel=thinks_separately,
                 retry_count=attempt,
                 move_number=self.board.fullmove_number,
                 panic=budget.panic,
@@ -343,17 +345,39 @@ class Match:
             uci = parse_move(response.text)
         except MoveParseError as exc:
             return None, ("truncated_no_tag" if response.truncated else str(exc))
-        try:
-            move = chess.Move.from_uci(uci.lower())
-        except ValueError:
-            # Some models answer in SAN despite the instruction; accept it if legal.
-            try:
-                move = self.board.parse_san(uci)
-            except ValueError:
-                return None, f"unparseable: {uci!r}"
+        move = self._parse_notation(uci)
+        if move is None:
+            return None, f"unparseable: {uci!r}"
         if move not in self.board.legal_moves:
             return None, f"illegal: {uci!r}"
         return move, None
+
+    def _parse_notation(self, text: str) -> chess.Move | None:
+        """Accept UCI, SAN, or long algebraic.
+
+        The prompt asks for UCI, and most of the time that is what comes back. But
+        models also write `Nc6` and `Nb8c6`, and both name exactly one legal move.
+        Rejecting them would make this a test of format compliance rather than of
+        chess, which is not what the retry policy is for (§5.3). Anything genuinely
+        ambiguous or illegal is still refused.
+        """
+        candidate = text.strip().rstrip("+#")
+        for attempt in (candidate, candidate.lower()):
+            try:
+                return chess.Move.from_uci(attempt)
+            except ValueError:
+                pass
+        try:
+            return self.board.parse_san(candidate)
+        except ValueError:
+            pass
+        # Long algebraic: a piece letter in front of an otherwise valid UCI move.
+        if len(candidate) >= 5 and candidate[0] in "KQRBNP":
+            try:
+                return chess.Move.from_uci(candidate[1:].lower())
+            except ValueError:
+                pass
+        return None
 
     def _random_legal(self) -> chess.Move:
         import random

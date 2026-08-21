@@ -244,3 +244,20 @@ async def test_replay_file_is_the_event_list(tmp_path):
     assert data["events"] == m.stream.events
     assert data["format_version"] == 1
     assert data["result"] == result.outcome.result
+
+
+async def test_long_algebraic_and_san_are_accepted_as_well_as_uci():
+    """§5.3 — the retry policy is for illegal moves, not for notation nitpicking.
+    `Nc6` and `Nb8c6` each name exactly one legal move."""
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"))
+    assert m._parse_notation("e2e4") == chess.Move.from_uci("e2e4")
+    assert m._parse_notation("Nf3") == chess.Move.from_uci("g1f3")
+    assert m._parse_notation("Ng1f3") == chess.Move.from_uci("g1f3")
+    assert m._parse_notation("E2E4") == chess.Move.from_uci("e2e4")
+
+
+async def test_genuinely_unparseable_notation_is_still_refused():
+    m = make_match(ScriptedAdapter("w"), ScriptedAdapter("b"))
+    assert m._parse_notation("the knight one") is None
+    assert m._parse_notation("") is None
+    assert m._parse_notation("zz9z9") is None

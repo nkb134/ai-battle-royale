@@ -21,6 +21,13 @@ import chess.engine
 
 MATE_SCORE = 10_000
 
+# Evaluations are clamped to this before a cp_loss is taken (§8.2, §8.4).
+# A mate score is +/-10000, so without a cap a single lost position dominates the
+# mean and ACPL stops describing the play: a random-mover match scored 6853. The
+# figure is a summary of decision quality, and past a rook down the position is
+# already decided, so further drops say nothing more about the move.
+ACPL_CAP = 1_000
+
 
 @dataclass(frozen=True)
 class AnalysisConfig:
@@ -164,10 +171,10 @@ def _terminal_eval(board: chess.Board) -> PlyEval:
 def cp_loss(cp_before: int, cp_after: int, mover_is_white: bool) -> int:
     """Swing against the mover, from the mover's point of view (§8.2).
 
-    Both inputs are White-POV. Never negative: a move cannot beat the engine's best.
+    Both inputs are White-POV, and both are clamped to +/-ACPL_CAP first. Never
+    negative: a move cannot beat the engine's best.
     """
-    if mover_is_white:
-        loss = cp_before - cp_after
-    else:
-        loss = cp_after - cp_before
+    before = max(-ACPL_CAP, min(ACPL_CAP, cp_before))
+    after = max(-ACPL_CAP, min(ACPL_CAP, cp_after))
+    loss = before - after if mover_is_white else after - before
     return max(0, loss)

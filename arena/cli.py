@@ -166,7 +166,8 @@ async def calibrate(args) -> int:
             opponent_clock_ms=900_000,
             increment_ms=10_000,
             token_budget=800,
-            max_output_tokens=800 + 320,
+            max_output_tokens=800 + 512,
+            separate_thinking_channel=bool(spec.get("thinking", False)),
             retry_count=0,
             move_number=board.fullmove_number,
         )

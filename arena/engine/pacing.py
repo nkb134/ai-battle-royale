@@ -24,7 +24,7 @@ class PacingConfig:
     panic_tokens: int = 250
     critical_fraction: float = 0.10
     move_tag_headroom: int = 96
-    visible_allowance: int = 320
+    visible_allowance: int = 512
 
     @classmethod
     def from_dict(cls, d: dict) -> PacingConfig:
@@ -41,7 +41,7 @@ class Budget:
     expected_moves_left: int
     time_per_move_ms: int | None
     headroom: int = 96
-    visible_allowance: int = 320
+    visible_allowance: int = 512
 
     def hard_cap(self, *, separate_thinking_channel: bool) -> int:
         """The request's max output ceiling, which is not the same as the budget.

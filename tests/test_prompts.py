@@ -17,7 +17,8 @@ def ctx(**kw):
         opponent_clock_ms=900_000,
         increment_ms=10_000,
         token_budget=1200,
-        max_output_tokens=1520,
+        max_output_tokens=1712,
+        separate_thinking_channel=False,
         retry_count=0,
         move_number=1,
     )
@@ -73,3 +74,14 @@ def test_legal_moves_only_listed_when_the_flag_is_on():
 def test_history_is_numbered_san():
     p = render(ctx(history_san=["e4", "e5", "Nf3"]))
     assert "1. e4" in p and "1... e5" in p and "2. Nf3" in p
+
+
+def test_a_thinking_model_is_asked_for_the_tag_alone():
+    """Its visible reply shares the request ceiling with its thinking, so prose there
+    costs it the tag (§6.2)."""
+    p = render(ctx(separate_thinking_channel=True))
+    assert "move tag alone" in p
+
+
+def test_a_plain_model_is_not_given_that_instruction():
+    assert "move tag alone" not in render(ctx())

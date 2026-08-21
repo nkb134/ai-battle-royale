@@ -66,6 +66,12 @@ Keep what you write outside your thinking short, and end with the move tag. A re
 that runs out of tokens before the tag counts as an illegal move, and costs you a
 retry and the time it took."""
 
+TAG_ONLY_SUFFIX = """
+
+You reason in a separate channel, which shares this request's token ceiling with your
+reply. Do your thinking there and make your visible reply the move tag alone, with no
+commentary around it."""
+
 RETRY_SUFFIX = """
 
 Your previous move was illegal. Give a different, legal move.
@@ -87,6 +93,8 @@ def render(ctx: MoveContext) -> str:
     legal (§5.3).
     """
     extra = ""
+    if ctx.separate_thinking_channel:
+        extra += TAG_ONLY_SUFFIX
     if ctx.panic:
         extra += PANIC_SUFFIX
     if ctx.legal_moves_san:

@@ -50,8 +50,10 @@ jobs:
           if [ ! -f arena/web/dist/replays/index.json ]; then
             echo '{"matches":[]}' > arena/web/dist/replays/index.json
           fi
-          echo "replays bundled:"
-          ls -1 arena/web/dist/replays/ | wc -l
+          mkdir -p arena/web/dist/reports
+          cp -r arena/data/reports/. arena/web/dist/reports/ 2>/dev/null || true
+          echo "replays bundled: $(ls -1 arena/web/dist/replays/ | wc -l)"
+          echo "reports bundled: $(ls -1 arena/web/dist/reports/ 2>/dev/null | wc -l)"
 
       # Pages has no server-side routing, so a copy of index.html answers deep links.
       - name: SPA fallback

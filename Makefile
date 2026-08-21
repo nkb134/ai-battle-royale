@@ -19,8 +19,9 @@ serve:
 # repo (§16.2). The Pages workflow does the same copy at build time.
 replays:
 	$(PY) -m arena.cli index
-	mkdir -p arena/web/public/replays
+	mkdir -p arena/web/public/replays arena/web/public/reports
 	cp arena/data/replays/*.json arena/web/public/replays/
+	-cp arena/data/reports/*.json arena/web/public/reports/ 2>/dev/null
 
 web: replays
 	pnpm --dir arena/web install && pnpm --dir arena/web dev

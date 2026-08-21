@@ -23,6 +23,10 @@ class MoveContext:
     # The request's max-output ceiling for this move. Not the same as token_budget:
     # see Budget.hard_cap for why the two differ by model type (§6.2).
     max_output_tokens: int
+    # True when the provider reasons in a channel of its own. Such a model is asked
+    # for the tag alone, because its visible reply shares the request ceiling with
+    # its thinking and prose there buys nothing.
+    separate_thinking_channel: bool
     retry_count: int
     move_number: int
     panic: bool = False

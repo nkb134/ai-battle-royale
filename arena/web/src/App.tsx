@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { MatchScreen } from './components/MatchScreen'
+import { ReportScreen } from './components/ReportScreen'
 import { SetupScreen } from './components/SetupScreen'
 import { usePlayback } from './usePlayback'
 import { useLiveMatch } from './useLiveMatch'
-import type { Replay, ReplayIndexEntry } from './types'
+import type { Replay, ReplayIndexEntry, Report } from './types'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -21,6 +22,7 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [replay, setReplay] = useState<Replay | null>(null)
+  const [report, setReport] = useState<Report | null>(null)
   const [liveUrl, setLiveUrl] = useState<string | null>(null)
   const [showArrows, setShowArrows] = useState(true)
 
@@ -49,8 +51,18 @@ export default function App() {
       .catch((e) => setError(String(e.message ?? e)))
   }, [])
 
+  // A report is optional: it only exists once `make analyze` has been run and the
+  // result committed, so a missing one is not an error.
+  const openReport = useCallback((matchId: string) => {
+    fetch(`${BASE}reports/${matchId}.json`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: Report | null) => data && setReport(data))
+      .catch(() => undefined)
+  }, [])
+
   const back = useCallback(() => {
     setReplay(null)
+    setReport(null)
     setLiveUrl(null)
     live.disconnect()
   }, [live])
@@ -75,6 +87,10 @@ export default function App() {
         }
       />
     )
+  }
+
+  if (report) {
+    return <ReportScreen report={report} onBack={back} />
   }
 
   if (replay) {
@@ -131,6 +147,7 @@ export default function App() {
       loading={loading}
       error={error}
       onOpen={openMatch}
+      onOpenReport={openReport}
       onConnectLive={setLiveUrl}
     />
   )

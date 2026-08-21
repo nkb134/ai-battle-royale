@@ -19,7 +19,7 @@ pacing:                          # §6.3
   # Models with a separate thinking channel bill thinking and answer against one
   # ceiling, so the request must leave room for a whole short answer or the model is
   # cut off before it writes <move>. See Budget.hard_cap.
-  visible_allowance: 320
+  visible_allowance: 512
 
 adjudicate:                      # §5.4
   resign_cp: -900

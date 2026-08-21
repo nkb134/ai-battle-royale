@@ -107,3 +107,29 @@ async def test_engine_pool_closes_every_process():
     await pool.close()
     await pool.close()  # idempotent
     assert pool._engines == []
+
+
+def test_cp_loss_is_capped_so_mate_scores_do_not_swamp_acpl():
+    """A mate score is +/-10000. Averaged raw, one lost position makes ACPL
+    meaningless — a random-mover match produced an ACPL of 6853. Evaluations are
+    clamped before the difference is taken, so a hopeless position contributes a
+    large-but-bounded number instead of a mate score."""
+    from arena.analysis.stockfish import ACPL_CAP
+
+    # White goes from winning to mated: bounded, not 20000.
+    assert cp_loss(MATE_SCORE, -MATE_SCORE, mover_is_white=True) == 2 * ACPL_CAP
+    # Ordinary losses are untouched by the cap.
+    assert cp_loss(100, -50, mover_is_white=True) == 150
+
+
+def test_the_cap_does_not_change_which_band_a_move_lands_in():
+    """§8.2 bands top out at 300, well inside the cap."""
+    from arena.analysis.annotate import classify
+
+    assert classify(cp_loss(0, -400, mover_is_white=True)) == "blunder"
+    assert classify(cp_loss(0, -100, mover_is_white=True)) == "inaccuracy"
+
+
+def test_already_lost_positions_do_not_keep_accruing_loss():
+    """Once both sides are past the cap the move cannot be blamed for a further drop."""
+    assert cp_loss(-5000, -9000, mover_is_white=True) == 0

@@ -17,6 +17,7 @@ interface Props {
   loading: boolean
   error: string | null
   onOpen: (matchId: string) => void
+  onOpenReport: (matchId: string) => void
   onConnectLive: (url: string) => void
 }
 
@@ -40,7 +41,9 @@ function qualifier(entry: ReplayIndexEntry): string | null {
   return null
 }
 
-export function SetupScreen({ entries, loading, error, onOpen, onConnectLive }: Props) {
+export function SetupScreen({
+  entries, loading, error, onOpen, onOpenReport, onConnectLive,
+}: Props) {
   const [liveUrl, setLiveUrl] = useState(DEFAULT_LIVE_URL)
   const [showLive, setShowLive] = useState(false)
 
@@ -76,7 +79,7 @@ export function SetupScreen({ entries, loading, error, onOpen, onConnectLive }: 
         )}
         <ul className="archive-list">
           {entries.map((entry) => (
-            <li key={entry.match_id}>
+            <li key={entry.match_id} className="archive-item">
               <button className="archive-row" onClick={() => onOpen(entry.match_id)}>
                 <span className="archive-players">
                   {entry.white} <span className="vs">vs</span> {entry.black}
@@ -89,6 +92,13 @@ export function SetupScreen({ entries, loading, error, onOpen, onConnectLive }: 
                   )}
                 </span>
                 <span className="archive-plies">{entry.ply_count} plies</span>
+              </button>
+              <button
+                className="archive-report link"
+                onClick={() => onOpenReport(entry.match_id)}
+                title="Post-match report"
+              >
+                report
               </button>
             </li>
           ))}
